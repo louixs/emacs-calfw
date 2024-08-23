@@ -95,8 +95,8 @@ For example,
       (when (buffer-live-p org-agenda-buffer)
         org-agenda-buffer))
     (org-compile-prefix-format nil)
-    (loop for date in (cfw:enumerate-days begin end) append
-          (loop for file in (or cfw:org-icalendars (org-agenda-files nil 'ifmode))
+    (cl-loop for date in (cfw:enumerate-days begin end) append
+          (cl-loop for file in (or cfw:org-icalendars (org-agenda-files nil 'ifmode))
                 append
                 (progn
                   (org-check-agenda-file file)
@@ -231,27 +231,27 @@ If this function splits into a list of string, the calfw displays those string i
 If TEXT does not have a range, return nil."
   (let* ((dotime (cfw:org-tp text 'dotime)))
     (and (stringp dotime) (string-match org-ts-regexp dotime)
-	 (let ((date-string  (match-string 1 dotime))
-	       (extra (cfw:org-tp text 'extra)))
-	   (if (string-match "(\\([0-9]+\\)/\\([0-9]+\\)): " extra)
-	       (let* ((cur-day (string-to-number
-				(match-string 1 extra)))
-		      (total-days (string-to-number
-				   (match-string 2 extra)))
-		      (start-date (time-subtract
-				   (org-read-date nil t date-string)
-				   (seconds-to-time (* 3600 24 (- cur-day 1)))))
-		      (end-date (time-add
-				 (org-read-date nil t date-string)
-				 (seconds-to-time (* 3600 24 (- total-days cur-day))))))
-		 (list (calendar-gregorian-from-absolute (time-to-days start-date))
-		       (calendar-gregorian-from-absolute (time-to-days end-date)) text))
-	     )))))
+   (let ((date-string  (match-string 1 dotime))
+         (extra (cfw:org-tp text 'extra)))
+     (if (string-match "(\\([0-9]+\\)/\\([0-9]+\\)): " extra)
+         (let* ((cur-day (string-to-number
+        (match-string 1 extra)))
+          (total-days (string-to-number
+           (match-string 2 extra)))
+          (start-date (time-subtract
+           (org-read-date nil t date-string)
+           (seconds-to-time (* 3600 24 (- cur-day 1)))))
+          (end-date (time-add
+         (org-read-date nil t date-string)
+         (seconds-to-time (* 3600 24 (- total-days cur-day))))))
+     (list (calendar-gregorian-from-absolute (time-to-days start-date))
+           (calendar-gregorian-from-absolute (time-to-days end-date)) text))
+       )))))
 
 (defun cfw:org-schedule-period-to-calendar (begin end)
   "[internal] Return calfw calendar items between BEGIN and END
 from the org schedule data."
-  (loop
+  (cl-loop
    with cfw:org-todo-keywords-regexp = (regexp-opt org-todo-keywords-for-agenda) ; dynamic bind
    with contents = nil with periods = nil
    for i in (cfw:org-collect-schedules-period begin end)
@@ -265,8 +265,8 @@ from the org schedule data."
    ; dotime is not present if this event was already added as a timerange
    (if (cfw:org-tp i 'dotime)
        (setq contents (cfw:contents-add
-		       (cfw:org-normalize-date date)
-		       line contents)))
+           (cfw:org-normalize-date date)
+           line contents)))
    finally return (nconc contents (list (cons 'periods periods)))))
 
 (defun cfw:org-schedule-sorter (text1 text2)
@@ -355,7 +355,7 @@ TEXT1 < TEXT2. This function makes no-time items in front of timed-items."
                                             (lambda (hl)
                                               (org-element-property :scheduled hl) ) ) 'timestamp
                            (lambda (hl) (org-element-property :begin hl) )))))
-        (loop for pos in pos-lst
+        (cl-loop for pos in pos-lst
               do (goto-char pos)
               for t-obj =  (org-element-timestamp-parser)
               for h-obj = (progn
@@ -372,16 +372,16 @@ TEXT1 < TEXT2. This function makes no-time items in front of timed-items."
               ;; (message "calfw-org: Cannot handle event")
               finally
               (kill-buffer (get-file-buffer file))
-              (return `((periods ,periods) ,@contents)))))))
+              (cl-return `((periods ,periods) ,@contents)))))))
 
 (defun cfw:org-to-calendar (file begin end)
-  (loop for event in (cfw:org-convert-org-to-calfw file)
+  (cl-loop for event in (cfw:org-convert-org-to-calfw file)
         if (and (listp event)
                 (equal 'periods (car event)))
         collect
         (cons
          'periods
-         (loop for evt in (cadr event)
+         (cl-loop for evt in (cadr event)
                if (and
                    (cfw:date-less-equal-p begin (cfw:event-end-date evt))
                    (cfw:date-less-equal-p (cfw:event-start-date evt) end))

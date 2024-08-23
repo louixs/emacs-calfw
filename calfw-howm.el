@@ -95,7 +95,7 @@ If this function splits into a list of string, the calfw displays those string i
 (defun cfw:howm-schedule-period-to-calendar (begin end)
   "[internal] Return calfw calendar items between BEGIN and END
 from the howm schedule data."
-  (loop with contents = nil
+  (cl-loop with contents = nil
         with periods = nil
         for i in (cfw:howm-schedule-period begin end)
         for date = (cfw:emacs-to-calendar
