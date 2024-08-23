@@ -1812,7 +1812,7 @@ where `event-fun' is applied if the element is a `cfw:event'."
           (when (and (= day calendar-week-start-day) week)
             (push (nreverse week) weeks)
             (setq week nil)
-            (when (cfw:date-less-equal-p end-date i) (return)))
+            (when (cfw:date-less-equal-p end-date i) (cl-return)))
           ;; add a day
           (push i week)
           ;; increment
@@ -1827,7 +1827,7 @@ where `event-fun' is applied if the element is a `cfw:event'."
         do
         (push i days)
         (when (cfw:date-less-equal-p end-date i)
-          (return (reverse days)))
+          (cl-return (reverse days)))
         (setq i (cfw:date-after i 1))))
 
 (defun cfw:view-model-make-day-names-for-week ()
@@ -1843,7 +1843,7 @@ where `event-fun' is applied if the element is a `cfw:event'."
         do
         (push day day-names)
         (when (cfw:date-less-equal-p end-date i)
-          (return (reverse day-names)))
+          (cl-return (reverse day-names)))
         (setq day (% (1+ day) cfw:week-days))
         (setq i (cfw:date-after i 1))))
 
@@ -2318,7 +2318,7 @@ found in the current view, return nil."
         for text-date = (and next (cfw:cursor-to-date next))
         while (and next (< next end)) do
         (if (and text-date (equal date text-date))
-            (return next))
+            (cl-return next))
         (setq pos next)))
 
 (defun cfw:find-all-by-date (dest date func)
@@ -2351,14 +2351,14 @@ this function returns nil."
         (when (and text-date (equal date text-date)
                    (eql row-count text-row-count))
           ;; this is needed item
-          (return next))
+          (cl-return next))
         (when (and text-date (equal date text-date)
                    text-row-count)
           ;; keep it to search bottom item
           (setq last-found next))
         (setq pos next)
         finally (if (and last-found (< row-count 0))
-                    (return last-found))))
+                    (cl-return last-found))))
 
 (defun cfw:navi-goto-date (date)
   "Move the cursor to DATE and put selection. If DATE is not
@@ -2777,7 +2777,7 @@ this function returns nil."
         for text-row-count = (and next (get-text-property next 'cfw:row-count))
         while next do
         (when (eql row-count text-row-count)
-          (return next))
+          (cl-return next))
         (setq pos next)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
